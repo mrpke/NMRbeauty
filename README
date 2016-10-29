@@ -1,0 +1,7 @@
+This is an different front end for the berkeley NMR facility time reservation tool reslog. The software should be self contained, including all of the thirdparty scripts used. 
+
+
+
+RUN: 
+
+python index.py
