@@ -1,0 +1,24 @@
+#!/usr/bin/expect
+
+eval spawn ssh -t -t user@reslog.cchem.berkeley.edu "linlog"
+set prompt ":"
+expect "*assword"
+send "efp+abs\r"
+expect "*rogram)"
+send [lindex $argv 0]
+send "\n"
+expect "*choice"
+send "1 \n"
+send "\r"
+expect "*number"
+send "n\n"
+send "\r"
+expect "*n for none)"
+send [lindex $argv 1]
+send "\n"
+send "\r"
+expect "*OK"
+send "y\n"
+send "\r"
+expect "*rogram)"
+send "q\n"
