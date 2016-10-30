@@ -1,29 +1,12 @@
 #!/usr/bin/python3
-import os
-#os.chdir(os.path.dirname(__file__))
-import sys
-#sys.path.append('/var/www/users/')
-#sys.path.append('/var/www/users/pyscripts')
-import cgitb
 import bottle
-from bottle import Bottle, run, route, template, request, response, url, SimpleTemplate
-#import pyscripts.askmysql as mysql
-#import pyscripts.askldap as ldap
-#import fdsend
-from io import StringIO
-import csv
-import codecs
+from bottle import run, route, template, request
 import json
-import datetime
-import random
 
 import numpy as np
-from lxml import etree 
-from lxml.etree import fromstring
 import requests
-import re
 from bs4 import BeautifulSoup
-import datetime
+
 
 def encode_HTML_specials(string):
     return string.encode("ascii", "xmlcharrefreplace").decode("utf-8")
@@ -33,38 +16,37 @@ def mergeTimes(timearray):
 
     timelist = list()
     temp = list()
-    #print(timearray)
     for e, i in enumerate(timearray[0]):
         if e == 0:
             if i != '---':
                 if temp:
-                    a = (e%6)*10
+                    a = (e % 6) * 10
                     temp.append(str(e//6)+":"+str(a))
                     timelist.append(temp)
                     temp = list()
                     temp.append(i)
-                    a = (e%6)*10
+                    a = (e % 6) * 10
                     temp.append(str(e//6)+":"+str(a))
                 else:
                     temp.append(i)
-                    a = (e%6)*10
+                    a = (e % 6) * 10
                     temp.append(str(e//6)+":"+str(a))
         elif i != timearray[0][e-1]:
             if i != '---':
                 if temp:
-                    a = (e%6)*10
+                    a = (e % 6) * 10
                     temp.append(str(e//6)+":"+str(a))
                     timelist.append(temp)
                     temp = list()
                     temp.append(i)
-                    a = (e%6)*10
+                    a = (e % 6) * 10
                     temp.append(str(e//6)+":"+str(a))
                 else:
                     temp.append(i)
-                    a = (e%6)*10
+                    a = (e % 6) * 10
                     temp.append(str(e//6)+":"+str(a))
             else:
-                a = (e%6)*10
+                a = (e % 6) * 10
                 temp.append(str(e//6)+":"+str(a))
                 timelist.append(temp)
                 temp = list()
@@ -72,33 +54,23 @@ def mergeTimes(timearray):
             if temp:
                 temp.append("0:0")
                 timelist.append(temp)
-    #print(timelist)
     for i in timelist:
 
         a = i[1].split(":")
         i[1] = int(a[0])*6+int(a[1])//10
         a = i[2].split(":")
-        i[2] = 24*6-1 if (int(a[0])*6+int(a[1])//10-1)==-1\
+        i[2] = 24*6-1 if (int(a[0])*6+int(a[1])//10-1) == -1\
             else int(a[0])*6+int(a[1])//10-1
 
     return(timelist)
 
-
-
-
-
-
-
-#application = bottle.default_app()
-#SimpleTemplate.defaults["get_url"] = application.get_url
-secret = "FSCH"
-
-#bottle.debug(True)
+secret = "NMRSSS"
 
 
 @route('/')
 def non():
     return template("templates/nmr", instruments=['Today', 'Tomorrow'])
+
 
 def reserveTime(data, instr, sh, sm, eh, em, day, dd):
     data["rc"] = "R"
@@ -112,9 +84,10 @@ def reserveTime(data, instr, sh, sm, eh, em, day, dd):
     data['ID'] = ""
     data['D'] = day
     page = requests.post('http://reslog.cchem.berkeley.edu/webres/web_res.php',
-                          data = data
-                        )
+                         data=data
+                         )
     print(data)
+
 
 def cancelTime(data, instr, sh, sm, eh, em, day, dd):
     data["rc"] = "C"
@@ -128,25 +101,27 @@ def cancelTime(data, instr, sh, sm, eh, em, day, dd):
     data['ID'] = ""
     data['D'] = day
     page = requests.post('http://reslog.cchem.berkeley.edu/webres/web_res.php',
-                          data = data
-                        )
+                         data=data
+                         )
     print(data)
+
 
 def getDataFromLogin(name, code):
     page = requests.post('http://reslog.cchem.berkeley.edu/webres/web_res.php',
-                          data = {'name': name,
-                                  'code':code,
-                                  'Submit':'Login',}
-                        )
+                         data={'name': name,
+                               'code': code,
+                               'Submit': 'Login', }
+                         )
     soup = BeautifulSoup(page.text, "lxml")
     data = dict()
-    data['Login'] = soup.find("input", {"name":"Login"})["value"]
-    data['name'] = soup.find("input", {"name":"name"})["value"]
-    data['code'] = soup.find("input", {"name":"code"})["value"]
+    data['Login'] = soup.find("input", {"name": "Login"})["value"]
+    data['name'] = soup.find("input", {"name": "name"})["value"]
+    data['code'] = soup.find("input", {"name": "code"})["value"]
     data['YesNo'] = "1"
-    data['group'] = soup.find("input", {"name":"group"})["value"]
-    data['account'] = soup.find("input", {"name":"account"})["value"]
+    data['group'] = soup.find("input", {"name": "group"})["value"]
+    data['account'] = soup.find("input", {"name": "account"})["value"]
     return data
+
 
 @route('/reserveTimes/<day>/<dd>', method='POST')
 def non(day, dd):
@@ -158,6 +133,7 @@ def non(day, dd):
         print(i)
         reserveTime(data.copy(), i[0][0], i[0][1], i[0][2], i[0][1], i[0][2]+10, day, dd)
     return "aa"
+
 
 @route('/cancelTimes/<day>/<dd>', method='POST')
 def non(day, dd):
@@ -194,10 +170,9 @@ def non(instr, day, dd):
     return json.dumps(mergeTimes(times))
 
 
-
 @route('/static/<filepath:path>', name='static')
 def server_static(filepath):
-    return bottle.static_file(filepath, root="C:\\Users\\Michael\\LRZ Sync+Share\\testserv\\NMRbeauty\\static")
+    return bottle.static_file(filepath, root="static")
 
 run(host='0.0.0.0', port=9090, debug=True)
 
